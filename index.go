@@ -1,0 +1,4 @@
+package antipastebin
+
+func init() {
+}

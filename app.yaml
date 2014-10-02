@@ -1,0 +1,12 @@
+application: antipastebin
+version: 0-0-1
+runtime: go
+api_version: go1
+
+handlers:
+- url: /fsm
+  static_dir: fsm
+- url: /txt
+  static_dir: txt
+- url: /
+  script: _go_app
