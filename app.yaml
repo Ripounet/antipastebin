@@ -8,5 +8,5 @@ handlers:
   static_dir: fsm
 - url: /txt
   static_dir: txt
-- url: /
+- url: /.*
   script: _go_app
