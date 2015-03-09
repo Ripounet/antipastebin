@@ -1,0 +1,68 @@
+<html>
+<head>
+  <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+  <script type="text/javascript">
+
+  var L = 2;
+  var H = 2;
+  var t = 0;
+
+  function get(i, j){
+  	var table = $("#g");
+  	var tr = table.find("tr")[j];
+  	var td = $(tr).find("td")[i];
+  	var color = $(td).css("background-color");
+  	console.log("["+i+","+j+"] is " + color)
+  	var val = (color == "black") ? 0 : 1;
+  	console.log("["+i+","+j+"] = " + val)
+  	return val;
+  }
+
+  function apply(i, j, state){
+  	var table = $("#g");
+  	var tr = table.find("tr")[j];
+  	var td = $(tr).find("td")[i];
+  	var color = (state == 0) ? "black" : "white";
+  	console.log("["+i+","+j+"] <- " + color);
+  	$(td).css("background-color", color) ;
+  }
+
+  function transition(i, j){
+  	var input = get(i, j)
+
+  	//var output = (i+j)%2
+  	var output = 1-input;
+  	apply(i, j, output);
+  }
+
+  function step(){
+  	t++;
+  	console.log("Step " + t)
+  	for(i=0;i<L;i++){
+  		for(j=0;j<H;j++){
+  			transition(i,j);
+  		}
+  	}
+
+  	setTimeout(step, 1000)
+  }
+
+  //step();
+
+  </script>
+</head>
+<body>
+<h1>Automaton grid</h1>
+
+<table id="g">
+	<tr>
+		<td>a</td>
+		<td>b</td>
+	</tr>
+	<tr>
+		<td>c</td>
+		<td>d</td>
+	</tr>
+
+</body>
+</html>

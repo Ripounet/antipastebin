@@ -10,5 +10,7 @@ handlers:
   static_dir: txt
 - url: /hairs
   static_dir: hairs
+- url: /automatons
+  static_dir: automatons
 - url: /.*
   script: _go_app
