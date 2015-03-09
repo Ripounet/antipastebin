@@ -1,0 +1,149 @@
+<html>
+<body>
+<h2>Curves</h2>
+<canvas id="c"  width="800" height="210"></canvas>
+<script>
+	function rnd(i) {
+		return Math.floor(Math.random() * i);
+	}
+	function INT(x){
+		return Math.floor(x);
+	}
+
+    var canvas = document.getElementById('c');
+    var contextGlobal = canvas.getContext('2d');
+	canvas.style.filter = "blur(0.5px)";
+	contextGlobal.beginPath();
+	contextGlobal.rect(0, 0, 800, 210);
+	contextGlobal.fillStyle = "rgb(200,160,255)";
+	contextGlobal.fill();
+	
+	var N = 8;
+	var hairs = [];
+	for(var i=0;i<N;i++){
+		var off = document.createElement('canvas');
+		off.width = 100;
+		off.height = 210;
+		var ctx = off.getContext('2d');
+		
+		var r0 = 10 + rnd(21);
+		var r1 = r0 * (0.2 + 0.7 * Math.random());
+		var r2 = r1 * (0.7 + 0.6 * Math.random());
+		var r3 = 10 + rnd(21);
+		var r4 = r3 * (0.7 + 0.6 * Math.random());
+		var r5 = r4 * (0.2 + 0.7 * Math.random());
+		var r6 = r5 * (0.7 + 0.6 * Math.random());
+		var r7 = 10 + rnd(21);
+		
+		var hair = {
+			xbase: 52 + (100 * i),
+			ybase: 200,
+			rad: [r0, r1, r2, r3, r4, r5, r6, r7],
+			width: 2 + rnd(7),
+			shade: rnd(100),
+			scale: 0.5,
+			dscale: 0.1,
+			image: off,
+			context: ctx
+		}
+		hairs.push(hair);
+	}
+
+	var draw = function(h){
+		var context = h.context;
+		var x = 50;
+		var y = 200;
+		//var x = h.xbase;
+		//var y = h.ybase;
+		
+		// Clear
+		context.beginPath();
+		context.rect(x-50, 0, x+50, y);
+		//context.fillStyle = "rgb(255,255,"+(x/4)+")";
+		//context.fillStyle = "white";
+		context.fillStyle = "rgba(255,255,150,1.0)";
+		context.fill();
+	  
+		// Start the curve
+        context.beginPath();
+        context.moveTo(x, y);
+		var rad;
+		var nx, ny;
+		
+		rad = h.rad[0];
+		nx = x - INT(h.scale * rad);
+		ny = y - INT(2 * h.scale * rad);
+		context.quadraticCurveTo(x, ny, nx, ny);
+		x = nx;
+		y = ny;
+		
+		rad = h.rad[1];
+		nx = x - INT(h.scale * rad);
+		ny = y + INT(h.scale * rad);
+		context.quadraticCurveTo(nx, y, nx, ny);
+		x = nx;
+		y = ny;
+		rad = h.rad[2];
+		nx = x+INT(h.scale * rad);
+		ny = y+INT(h.scale * rad);
+		context.quadraticCurveTo(x, ny, nx, ny);
+		x = nx;
+		y = ny;
+		
+		rad = h.rad[3];
+		nx = x+INT(h.scale * rad);
+		ny = y-INT(h.scale * rad);
+		context.quadraticCurveTo(nx, y, nx, ny);
+		x = nx;
+		y = ny;
+		rad = h.rad[4];
+		nx = x-INT(h.scale * rad);
+		ny = y-INT(h.scale * rad);
+		context.quadraticCurveTo(x, ny, nx, ny);
+		x = nx;
+		y = ny;
+		
+		rad = h.rad[5];
+		nx = x-INT(h.scale * rad);
+		ny = y+INT(h.scale * rad);
+		context.quadraticCurveTo(nx, y, nx, ny);
+		x = nx;
+		y = ny;
+		rad = h.rad[6];
+		nx = x+INT(h.scale * rad);
+		ny = y+INT(h.scale * rad);
+		context.quadraticCurveTo(x, ny, nx, ny);
+		x = nx;
+		y = ny;
+		
+		rad = h.rad[7];
+		nx = x+INT(h.scale * rad);
+		ny = y-INT(h.scale * rad);
+		context.quadraticCurveTo(nx, y, nx, ny);
+			
+        context.lineWidth = h.width;
+		var v = h.shade;
+        context.strokeStyle = "rgba(" + INT(1.1* v)
+			+","+v
+			+","+INT(0.7 * v)
+			+", 0.7)";
+        context.stroke();
+	};
+	
+	function render(h){
+		contextGlobal.drawImage(h.image, h.xbase-50, 0);
+	}
+	
+	var start = function(h){
+		draw(h);
+		render(h);
+		h.scale += h.dscale;
+		if(h.scale < 0.55 || h.scale>1.45)
+			h.dscale *= -1;
+		window.setTimeout(start, 100+rnd(30), h);
+	};
+	
+	hairs.forEach(start);
+</script>
+</body>
+</html>
