@@ -1,7 +1,20 @@
-<html>
+	<html>
+<head>
+	<style type="text/css">
+		.stacked{
+			/* z-index: 1; */
+	    	position:absolute;
+	    	left:0px;
+	    	top:0px;
+		}
+	</style>
+</head>
 <body>
 <h2>Curves</h2>
-<canvas id="c"  width="800" height="210"></canvas>
+<div>
+	<img src="mask.png" class="stacked" />
+	<canvas id="c"  width="800" height="410" class="stacked"></canvas>
+</div>
 <script>
 	function rnd(i) {
 		return Math.floor(Math.random() * i);
@@ -14,7 +27,7 @@
     var contextGlobal = canvas.getContext('2d');
 	canvas.style.filter = "blur(0.5px)";
 	contextGlobal.beginPath();
-	contextGlobal.rect(0, 0, 800, 210);
+	contextGlobal.rect(0, 300, 800, 410);
 	contextGlobal.fillStyle = "rgb(200,160,255)";
 	contextGlobal.fill();
 	
@@ -23,7 +36,7 @@
 	for(var i=0;i<N;i++){
 		var off = document.createElement('canvas');
 		off.width = 100;
-		off.height = 210;
+		off.height = 410;
 		var ctx = off.getContext('2d');
 		
 		var r0 = 10 + rnd(21);
@@ -43,6 +56,7 @@
 			shade: rnd(100),
 			scale: 0.5,
 			dscale: 0.1,
+			rotation: 0.2 * i,
 			image: off,
 			context: ctx
 		}
@@ -51,18 +65,22 @@
 
 	var draw = function(h){
 		var context = h.context;
-		var x = 50;
-		var y = 200;
-		//var x = h.xbase;
-		//var y = h.ybase;
 		
 		// Clear
-		context.beginPath();
-		context.rect(x-50, 0, x+50, y);
+		//context.beginPath();
+		//context.rect(0, 100, 100, 410);
 		//context.fillStyle = "rgb(255,255,"+(x/4)+")";
 		//context.fillStyle = "white";
-		context.fillStyle = "rgba(255,255,150,1.0)";
-		context.fill();
+		//context.fillStyle = "rgba(255,255,150,0.5)";
+		//context.fill();
+		context.clearRect ( 0 , 0 , 100, 410);
+
+		//var x = 50;
+		//var y = 200;
+		var x = 0;
+		var y = 0;
+		context.translate(50, 200);
+		context.rotate(h.rotation);
 	  
 		// Start the curve
         context.beginPath();
@@ -128,9 +146,14 @@
 			+","+INT(0.7 * v)
 			+", 0.7)";
         context.stroke();
+
+		context.rotate(-h.rotation);
+		context.translate(-50, -200);
 	};
 	
 	function render(h){
+		//contextGlobal.rotate(h.rotation);
+		//contextGlobal.clearRect(h.image, h.xbase-50, 0);
 		contextGlobal.drawImage(h.image, h.xbase-50, 0);
 	}
 	
@@ -140,7 +163,7 @@
 		h.scale += h.dscale;
 		if(h.scale < 0.55 || h.scale>1.45)
 			h.dscale *= -1;
-		window.setTimeout(start, 100+rnd(30), h);
+		window.setTimeout(start, 500+rnd(30), h);
 	};
 	
 	hairs.forEach(start);

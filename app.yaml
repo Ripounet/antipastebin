@@ -12,5 +12,7 @@ handlers:
   static_dir: hairs
 - url: /automatons
   static_dir: automatons
+- url: /up
+  static_dir: up
 - url: /.*
   script: _go_app
