@@ -1,18 +1,20 @@
-	<html>
+<html>
 <head>
 	<style type="text/css">
 		.stacked{
 			/* z-index: 1; */
 	    	position:absolute;
 	    	left:0px;
-	    	top:0px;
+	    	top:100px;
 		}
 	</style>
 </head>
 <body>
 <h2>Curves</h2>
+
+<input type="button" onclick="javascript:pickPoint();" value="Pick">
 <div>
-	<img src="mask.png" class="stacked" />
+	<img src="mask.png" id="mask" class="stacked" />
 	<canvas id="c"  width="800" height="410" class="stacked"></canvas>
 </div>
 <script>
@@ -166,7 +168,41 @@
 		window.setTimeout(start, 500+rnd(30), h);
 	};
 	
+	var maskImg = document.getElementById('mask');
+	var hiddenMask = document.createElement('canvas');
+	hiddenMask.width = 600;
+	hiddenMask.height = 600;
+	var hiddenMaskCtx = hiddenMask.getContext('2d');
+
+	function pickPoint(){
+		hiddenMaskCtx.drawImage(maskImg, 0, 0); // TODO don't redraw each time. Just once when img has arrived.
+
+		//alert("a");
+		for(var k=0;k<100;k+=1){
+			/*
+			var x = 10 * INT(k/60);
+			var y = 10 * (k%60);
+			var data = hiddenMaskCtx.getImageData(x, y, 1, 1).data;
+			if( data[0] > 100 ){
+				alert("[" + x + ", " + y + "] -> " + data[0] + "  (after " + k + " attempts)");
+			}
+			if( k % 510 == 7 ){
+				alert("[" + x + ", " + y + "] -> " + data[0] + "  (after " + k + " attempts)");
+			}
+			*/
+			var x = rnd(600);
+			var y = rnd(600);
+			var data = hiddenMaskCtx.getImageData(x, y, 1, 1).data;
+			if( data[0] > 100 ){
+				alert("[" + x + ", " + y + "] -> " + data[0] + "  (after " + k + " attempts)");
+				break;
+			}
+		}
+		//alert("b");
+	}
+
 	hairs.forEach(start);
+	//pickPoint();
 </script>
 </body>
 </html>
