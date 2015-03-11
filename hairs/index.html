@@ -160,12 +160,18 @@
 	}
 	
 	var start = function(h){
+		startN(h, 3);
+	}
+
+	var startN = function(h, N){
+		if(N==0)
+			return;
 		draw(h);
 		render(h);
 		h.scale += h.dscale;
 		if(h.scale < 0.55 || h.scale>1.45)
 			h.dscale *= -1;
-		window.setTimeout(start, 500+rnd(30), h);
+		window.setTimeout(startN, 500+rnd(30), h, N-1);
 	};
 	
 	var maskImg = document.getElementById('mask');
