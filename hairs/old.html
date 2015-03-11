@@ -1,0 +1,89 @@
+<html>
+<body>
+<h2>Curves</h2>
+<canvas id="c" width="800" height="410"></canvas>
+<script>
+  function rnd(i) {
+    return Math.floor(Math.random() * i);
+  }
+
+var canvas = document.getElementById('c');
+var context = canvas.getContext('2d');
+  
+  var hairs = [];
+  for(var i=0;i<8;i++){
+    var r0 = rnd(31);
+    var r1 = r0 * (0.2 + 0.7 * Math.random());
+    var r2 = r1 * (0.7 + 0.6 * Math.random());
+    var r3 = rnd(31);
+    var r4 = r3 * (0.7 + 0.6 * Math.random());
+    var r5 = r4 * (0.2 + 0.7 * Math.random());
+    var r6 = r5 * (0.7 + 0.6 * Math.random());
+    var r7 = rnd(31);
+    var hair = {
+      xbase: 40 + (100 * i),
+      ybase: 400,
+      rad: [r0, r1, r2, r3, r4, r5, r6, r7],
+      width: 2 + rnd(7),
+      shade: rnd(100)
+    }
+    hairs.push(hair);
+  }
+
+  var draw = function(h){
+    var x = h.xbase;
+    var y = h.ybase;
+context.beginPath();
+context.moveTo(x, y);
+    var rad;
+    
+    rad = h.rad[0];
+    context.quadraticCurveTo(x, y-2*rad, x-rad, y-2*rad);
+    x = x-rad;
+    y = y-2*rad;
+    
+    rad = h.rad[1];
+    context.quadraticCurveTo(x-rad, y, x-rad, y+rad);
+    x = x-rad;
+    y = y+rad;
+    rad = h.rad[2];
+    context.quadraticCurveTo(x, y+rad, x+rad, y+rad);
+    x = x+rad;
+    y = y+rad;
+    
+    rad = h.rad[3];
+    context.quadraticCurveTo(x+rad, y, x+rad, y-rad);
+    x = x+rad;
+    y = y-rad;
+    rad = h.rad[4];
+    context.quadraticCurveTo(x, y-rad, x-rad, y-rad);
+    x = x-rad;
+    y = y-rad;
+    
+    rad = h.rad[5];
+    context.quadraticCurveTo(x-rad, y, x-rad, y+rad);
+    x = x-rad;
+    y = y+rad;
+    rad = h.rad[6];
+    context.quadraticCurveTo(x, y+rad, x+rad, y+rad);
+    x = x+rad;
+    y = y+rad;
+    
+    rad = h.rad[7];
+    context.quadraticCurveTo(x+rad, y, x+rad, y-rad);
+      
+context.lineWidth = h.width;
+    var v = h.shade;
+context.strokeStyle = "rgb(" + Math.floor((1.0 + 0.4* Math.random()) * v)
+      +","+v
+      +","+Math.floor((0.2 + 0.8* Math.random()) * v)+")";
+context.stroke();
+  };
+  
+  hairs.forEach(draw);
+
+//context.bezierCurveTo(140, 10, 388, 10, 388, 170);
+//context.bezierCurveTo(160, 10, 408, 10, 408, 170);
+</script>
+</body>
+</html>
