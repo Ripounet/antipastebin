@@ -1,5 +1,6 @@
 <html>
 <head>
+	<script type="text/javascript" src="http://codeorigin.jquery.com/jquery-1.10.2.min.js"></script>
 	<style type="text/css">
 		.stacked{
 			/* z-index: 1; */
@@ -7,17 +8,28 @@
 	    	left:0px;
 	    	top:100px;
 		}
+		#mask{
+			/*
+			*/
+			visibility: hidden;
+		}
 	</style>
 </head>
 <body>
 <h2>Curves</h2>
 
-<input type="button" onclick="javascript:pickPoint();" value="Pick">
+<!--
+<input type="button" onclick="javascript:hairs.forEach(start);" value="Pick">
+-->
 <div>
 	<img src="mask.png" id="mask" class="stacked" />
 	<canvas id="c"  width="800" height="410" class="stacked"></canvas>
 </div>
 <script>
+	//
+	// Utils
+	//
+
 	function rnd(i) {
 		return Math.floor(Math.random() * i);
 	}
@@ -25,45 +37,86 @@
 		return Math.floor(x);
 	}
 
+	//
+	// Hidden mask (hairs can start on white or grey, not on black)
+	// 
+	var maskImg = document.getElementById('mask');
+	var hiddenMask = document.createElement('canvas');
+	hiddenMask.width = 600;
+	hiddenMask.height = 600;
+	var hiddenMaskCtx = hiddenMask.getContext('2d');
+
+	function pickPoint(){
+		hiddenMaskCtx.drawImage(maskImg, 0, 0); // TODO don't redraw each time. Just once when img has arrived.
+
+		for(var k=0;k<400;k++){
+			var x = rnd(hiddenMask.width);
+			var y = rnd(hiddenMask.height);
+			var data = hiddenMaskCtx.getImageData(x, y, 1, 1).data;
+			if( data[0] > 10 ){
+				var chance = rnd(256);
+				if( chance <= data[0] ){
+					console.log("Picked " + [x, y]);
+					return [x, y];
+				}
+			}
+		}
+		return false;
+	}
+
     var canvas = document.getElementById('c');
     var contextGlobal = canvas.getContext('2d');
 	canvas.style.filter = "blur(0.5px)";
+
+	/*
 	contextGlobal.beginPath();
 	contextGlobal.rect(0, 300, 800, 410);
 	contextGlobal.fillStyle = "rgb(200,160,255)";
 	contextGlobal.fill();
+	*/
 	
-	var N = 8;
-	var hairs = [];
-	for(var i=0;i<N;i++){
-		var off = document.createElement('canvas');
-		off.width = 100;
-		off.height = 410;
-		var ctx = off.getContext('2d');
-		
-		var r0 = 10 + rnd(21);
-		var r1 = r0 * (0.2 + 0.7 * Math.random());
-		var r2 = r1 * (0.7 + 0.6 * Math.random());
-		var r3 = 10 + rnd(21);
-		var r4 = r3 * (0.7 + 0.6 * Math.random());
-		var r5 = r4 * (0.2 + 0.7 * Math.random());
-		var r6 = r5 * (0.7 + 0.6 * Math.random());
-		var r7 = 10 + rnd(21);
-		
-		var hair = {
-			xbase: 52 + (100 * i),
-			ybase: 200,
-			rad: [r0, r1, r2, r3, r4, r5, r6, r7],
-			width: 2 + rnd(7),
-			shade: rnd(100),
-			scale: 0.5,
-			dscale: 0.1,
-			rotation: 0.2 * i,
-			image: off,
-			context: ctx
+
+	$("#mask").load(function() {
+		var N = 150;
+		var hairs = [];
+		for(var i=0;i<N;i++){
+			var off = document.createElement('canvas');
+			off.width = 100;
+			off.height = 410;
+			var ctx = off.getContext('2d');
+			
+			var r0 = 10 + rnd(21);
+			var r1 = r0 * (0.2 + 0.7 * Math.random());
+			var r2 = r1 * (0.7 + 0.6 * Math.random());
+			var r3 = 10 + rnd(21);
+			var r4 = r3 * (0.7 + 0.6 * Math.random());
+			var r5 = r4 * (0.2 + 0.7 * Math.random());
+			var r6 = r5 * (0.7 + 0.6 * Math.random());
+			var r7 = 10 + rnd(21);
+			
+			var base = pickPoint();
+			var xbase = base[0];
+			var ybase = base[1];
+
+			var hair = {
+				//xbase: 52 + (100 * i),
+				//ybase: 200,
+				xbase: xbase,
+				ybase: ybase,
+				rad: [r0, r1, r2, r3, r4, r5, r6, r7],
+				width: 2 + rnd(7),
+				shade: rnd(100),
+				scale: 0.5,
+				dscale: 0.1,
+				rotation: 0.2 * i,
+				image: off,
+				context: ctx
+			}
+			hairs.push(hair);
+
+			start(hair);
 		}
-		hairs.push(hair);
-	}
+	});
 
 	var draw = function(h){
 		var context = h.context;
@@ -156,7 +209,15 @@
 	function render(h){
 		//contextGlobal.rotate(h.rotation);
 		//contextGlobal.clearRect(h.image, h.xbase-50, 0);
-		contextGlobal.drawImage(h.image, h.xbase-50, 0);
+		//contextGlobal.drawImage(h.image, h.xbase-50, 0);
+		contextGlobal.drawImage(h.image, h.xbase-50, h.ybase-200);
+
+		/*
+		contextGlobal.beginPath();
+		contextGlobal.rect(h.xbase-1, h.ybase-1, 3, 3);
+		contextGlobal.fillStyle = "red";
+		contextGlobal.fill();
+		*/
 	}
 	
 	var start = function(h){
@@ -173,41 +234,8 @@
 			h.dscale *= -1;
 		window.setTimeout(startN, 500+rnd(30), h, N-1);
 	};
-	
-	var maskImg = document.getElementById('mask');
-	var hiddenMask = document.createElement('canvas');
-	hiddenMask.width = 600;
-	hiddenMask.height = 600;
-	var hiddenMaskCtx = hiddenMask.getContext('2d');
 
-	function pickPoint(){
-		hiddenMaskCtx.drawImage(maskImg, 0, 0); // TODO don't redraw each time. Just once when img has arrived.
-
-		//alert("a");
-		for(var k=0;k<100;k+=1){
-			/*
-			var x = 10 * INT(k/60);
-			var y = 10 * (k%60);
-			var data = hiddenMaskCtx.getImageData(x, y, 1, 1).data;
-			if( data[0] > 100 ){
-				alert("[" + x + ", " + y + "] -> " + data[0] + "  (after " + k + " attempts)");
-			}
-			if( k % 510 == 7 ){
-				alert("[" + x + ", " + y + "] -> " + data[0] + "  (after " + k + " attempts)");
-			}
-			*/
-			var x = rnd(600);
-			var y = rnd(600);
-			var data = hiddenMaskCtx.getImageData(x, y, 1, 1).data;
-			if( data[0] > 100 ){
-				alert("[" + x + ", " + y + "] -> " + data[0] + "  (after " + k + " attempts)");
-				break;
-			}
-		}
-		//alert("b");
-	}
-
-	hairs.forEach(start);
+	//hairs.forEach(start);
 	//pickPoint();
 </script>
 </body>
