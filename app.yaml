@@ -14,5 +14,7 @@ handlers:
   static_dir: automatons
 - url: /up
   static_dir: up
+- url: /gif
+  static_dir: gif
 - url: /.*
   script: _go_app
