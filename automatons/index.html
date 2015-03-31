@@ -1,68 +1,96 @@
 <html>
 <head>
   <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
-  <script type="text/javascript">
-
-  var L = 2;
-  var H = 2;
-  var t = 0;
-
-  function get(i, j){
-  	var table = $("#g");
-  	var tr = table.find("tr")[j];
-  	var td = $(tr).find("td")[i];
-  	var color = $(td).css("background-color");
-  	console.log("["+i+","+j+"] is " + color)
-  	var val = (color == "black") ? 0 : 1;
-  	console.log("["+i+","+j+"] = " + val)
-  	return val;
-  }
-
-  function apply(i, j, state){
-  	var table = $("#g");
-  	var tr = table.find("tr")[j];
-  	var td = $(tr).find("td")[i];
-  	var color = (state == 0) ? "black" : "white";
-  	console.log("["+i+","+j+"] <- " + color);
-  	$(td).css("background-color", color) ;
-  }
-
-  function transition(i, j){
-  	var input = get(i, j)
-
-  	//var output = (i+j)%2
-  	var output = 1-input;
-  	apply(i, j, output);
-  }
-
-  function step(){
-  	t++;
-  	console.log("Step " + t)
-  	for(i=0;i<L;i++){
-  		for(j=0;j<H;j++){
-  			transition(i,j);
-  		}
-  	}
-
-  	setTimeout(step, 1000)
-  }
-
-  //step();
-
-  </script>
 </head>
 <body>
 <h1>Automaton grid</h1>
 
-<table id="g">
-	<tr>
-		<td>a</td>
-		<td>b</td>
-	</tr>
-	<tr>
-		<td>c</td>
-		<td>d</td>
-	</tr>
+<script type="text/javascript">
+
+
+  function transition(me, up, right, down, left){
+     var n = up + right + down + left;
+     //return (me == 1) ? ((n==2 || n==3) ? 1 : 0) : ((n==3) ? 1 : 0);
+     if( Math.random()<0.2 ){
+       return 1-me;
+     }
+     return up + right + down + left >= 2;
+  }
+
+
+  var W = 60;
+  var H = 40;
+  var t = 0;
+
+  function createGrid(width, height){
+    var table = $("<table id=\"g\">").css("border-width", 3).css("border-style", "solid");
+    for(var i=0;i<height;i++){
+      var tr = $("<tr>");
+      for(var j=0;j<height;j++){
+        var val = (Math.random()<0.5) ? 0 : 1;
+        var td = $("<td>").html(/*i + "," + j*/ "__").css("border-width", 1).css("border-style", "solid").attr("x-data-value", val);
+        tr.append(td);
+      }
+      table.append(tr);
+    }
+    return table;
+  }
+
+  function get(i, j){
+    var table = $("#g");
+    var tr = table.find("tr")[j];
+    var td = $(tr).find("td")[i];
+    /*
+    var color = $(td).css("background-color");
+    console.log("["+i+","+j+"] is " + color)
+    var val = (color == "black") ? 0 : 1;
+    console.log("["+i+","+j+"] = " + val)
+    */
+    var val = $(td).attr("x-data-value");
+    if(!val){
+      val = 0;
+    }
+    return val;
+  }
+
+  function apply(i, j, state){
+    var table = $("#g");
+    var tr = table.find("tr")[j];
+    var td = $(tr).find("td")[i];
+    var color = (state == 0) ? "black" : "white";
+    //console.log("["+i+","+j+"] <- " + color);
+    $(td).css("background-color", color) ;
+    $(td).attr("x-data-value", state);
+  }
+
+  function change(i, j){
+    var oldValue = get(i, j)
+
+    var up = (i<=0) ? 0 : get(i-1, j);
+    var right = (j>=W-1) ? 0 : get(i, j+1);
+    var down = (i>=H-1) ? 0 : get(i+1, j);
+    var left = (j<=0) ? 0 : get(i, j-1);
+
+    var newValue = transition(oldValue, up, right, down, left);
+    apply(i, j, newValue);
+  }
+
+  function step(){
+    t++;
+    console.log("Step " + t)
+    for(i=0;i<W;i++){
+      for(j=0;j<H;j++){
+        change(i,j);
+      }
+    }
+
+    setTimeout(step, 500)
+  }
+
+  $("body").append( createGrid(W, H) );
+  step();
+
+</script>
 
 </body>
 </html>
