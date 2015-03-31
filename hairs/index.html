@@ -22,10 +22,57 @@
 <input type="button" onclick="javascript:hairs.forEach(start);" value="Pick">
 -->
 <div>
-	<img src="mask.png" id="mask" class="stacked" />
-	<canvas id="c"  width="800" height="410" class="stacked"></canvas>
+    <img src="b.jpg" class="stacked" />
+	<img src="b_mask.png" id="mask" class="stacked" />
+	<canvas id="c"  class="stacked"></canvas>
 </div>
 <script>
+	// Photos
+	var db = [
+		{
+			name: "a",
+			width: 960,
+			height: 1280,
+			hair: {
+				color: [39, 21, 11],
+				angle: 0,
+				size: 0.3,
+				thick: 6
+			}
+		},
+		{
+			name: "b",
+			width: 960,
+			height: 1280,
+			hair: {
+				color: [55, 45, 36],
+				angle: 0,
+				size: 0.3,
+				thick: 6
+			}
+		},
+		{
+			name: "b",
+			width: 960,
+			height: 1280,
+			hair: {
+				color: [80, 55, 46],
+				angle: 0,
+				size: 0.8,
+				thick: 6
+			}
+		}
+	];
+	
+	var sample = db[1];
+	
+	//
+	// Parameters
+	// 
+	var N = 100;
+	var delta = 1000;
+
+
 	//
 	// Utils
 	//
@@ -36,19 +83,24 @@
 	function INT(x){
 		return Math.floor(x);
 	}
+	function lightvar(){
+		return 0.7 + 0.6 * Math.random();
+	}
+	function between(a, b) {
+	    return a + Math.floor(Math.random() * (b- a+ 1));
+	}
 
 	//
 	// Hidden mask (hairs can start on white or grey, not on black)
 	// 
 	var maskImg = document.getElementById('mask');
 	var hiddenMask = document.createElement('canvas');
-	hiddenMask.width = 600;
-	hiddenMask.height = 600;
-	var hiddenMaskCtx = hiddenMask.getContext('2d');
-
-	function pickPoint(){
+		hiddenMask.width = sample.width;
+		hiddenMask.height = sample.height;
+		var hiddenMaskCtx = hiddenMask.getContext('2d');
 		hiddenMaskCtx.drawImage(maskImg, 0, 0); // TODO don't redraw each time. Just once when img has arrived.
 
+	function pickPoint(){
 		for(var k=0;k<400;k++){
 			var x = rnd(hiddenMask.width);
 			var y = rnd(hiddenMask.height);
@@ -65,6 +117,8 @@
 	}
 
     var canvas = document.getElementById('c');
+    canvas.width = sample.width;
+    canvas.height = sample.height;
     var contextGlobal = canvas.getContext('2d');
 	canvas.style.filter = "blur(0.5px)";
 
@@ -77,7 +131,6 @@
 	
 
 	$("#mask").load(function() {
-		var N = 150;
 		var hairs = [];
 		for(var i=0;i<N;i++){
 			var off = document.createElement('canvas');
@@ -104,9 +157,9 @@
 				xbase: xbase,
 				ybase: ybase,
 				rad: [r0, r1, r2, r3, r4, r5, r6, r7],
-				width: 2 + rnd(7),
+				width: between(2, sample.hair.thick),
 				shade: rnd(100),
-				scale: 0.5,
+				scale: sample.hair.size,
 				dscale: 0.1,
 				rotation: 0.2 * i,
 				image: off,
@@ -195,11 +248,18 @@
 		context.quadraticCurveTo(nx, y, nx, ny);
 			
         context.lineWidth = h.width;
+		/*
 		var v = h.shade;
         context.strokeStyle = "rgba(" + INT(1.1* v)
 			+","+v
 			+","+INT(0.7 * v)
 			+", 0.7)";
+		*/
+        context.strokeStyle = "rgba("
+        + INT(lightvar() * sample.hair.color[0])
+		+ "," + INT(lightvar() * sample.hair.color[1])
+		+ "," + INT(lightvar() * sample.hair.color[2])
+		+", 0.7)";
         context.stroke();
 
 		context.rotate(-h.rotation);
@@ -221,7 +281,8 @@
 	}
 	
 	var start = function(h){
-		startN(h, 3);
+//		startN(h, 3);
+		window.setTimeout(startN, 1000, h, 3);
 	}
 
 	var startN = function(h, N){
@@ -232,7 +293,7 @@
 		h.scale += h.dscale;
 		if(h.scale < 0.55 || h.scale>1.45)
 			h.dscale *= -1;
-		window.setTimeout(startN, 500+rnd(30), h, N-1);
+		window.setTimeout(startN, delta+rnd(30), h, N-1);
 	};
 
 	//hairs.forEach(start);
