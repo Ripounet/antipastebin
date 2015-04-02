@@ -8,13 +8,23 @@
 <script type="text/javascript">
 
 
-  function transition(me, up, right, down, left){
-     var n = up + right + down + left;
-     //return (me == 1) ? ((n==2 || n==3) ? 1 : 0) : ((n==3) ? 1 : 0);
+  function transition(me, up, upright, right, downright, down, downleft, left, upleft){
+     var m = up + right + down + left;
+     var n = m + upright + downright + downleft + upleft;
+     console.log(m + ", " + n)
+     if(me==1){
+        // I was alive
+        return ((n==2 || n==3) ? 1 : 0);
+     }else{
+        // I was dead
+        return ((n==3) ? 1 : 0);  
+     }
+     /*
      if( Math.random()<0.2 ){
        return 1-me;
      }
      return up + right + down + left >= 2;
+     */
   }
 
 
@@ -26,7 +36,7 @@
     var table = $("<table id=\"g\">").css("border-width", 3).css("border-style", "solid");
     for(var i=0;i<height;i++){
       var tr = $("<tr>");
-      for(var j=0;j<height;j++){
+      for(var j=0;j<width;j++){
         var val = (Math.random()<0.5) ? 0 : 1;
         var td = $("<td>").html(/*i + "," + j*/ "__").css("border-width", 1).css("border-style", "solid").attr("x-data-value", val);
         tr.append(td);
@@ -38,25 +48,29 @@
 
   function get(i, j){
     var table = $("#g");
-    var tr = table.find("tr")[j];
-    var td = $(tr).find("td")[i];
+    var tr = table.find("tr")[i];
+    var td = $(tr).find("td")[j];
     /*
     var color = $(td).css("background-color");
     console.log("["+i+","+j+"] is " + color)
     var val = (color == "black") ? 0 : 1;
     console.log("["+i+","+j+"] = " + val)
     */
-    var val = $(td).attr("x-data-value");
+    var valstr = $(td).attr("x-data-value");
+    var val = parseInt(valstr, 10);
+    //console.log("x-data-value=" + val);
+    /*
     if(!val){
       val = 0;
     }
+    */
     return val;
   }
 
   function apply(i, j, state){
     var table = $("#g");
-    var tr = table.find("tr")[j];
-    var td = $(tr).find("td")[i];
+    var tr = table.find("tr")[i];
+    var td = $(tr).find("td")[j];
     var color = (state == 0) ? "black" : "white";
     //console.log("["+i+","+j+"] <- " + color);
     $(td).css("background-color", color) ;
@@ -65,26 +79,31 @@
 
   function change(i, j){
     var oldValue = get(i, j)
+    //console.log("oldValue = ", oldValue);
 
     var up = (i<=0) ? 0 : get(i-1, j);
+    var upright = (i<=0 || j>=W-1) ? 0 : get(i-1, j+1);
     var right = (j>=W-1) ? 0 : get(i, j+1);
+    var downright = (j>=W-1 || i>=H-1) ? 0 : get(i+1, j+1);
     var down = (i>=H-1) ? 0 : get(i+1, j);
+    var downleft = (i>=H-1 || j<=0) ? 0 : get(i+1, j-1);
     var left = (j<=0) ? 0 : get(i, j-1);
+    var upleft = (j<=0 || i<=0) ? 0 : get(i-1, j-1);
 
-    var newValue = transition(oldValue, up, right, down, left);
+    var newValue = transition(oldValue, up, upright, right, downright, down, downleft, left, upleft);
     apply(i, j, newValue);
   }
 
   function step(){
     t++;
     console.log("Step " + t)
-    for(i=0;i<W;i++){
-      for(j=0;j<H;j++){
+    for(i=0;i<H;i++){
+      for(j=0;j<W;j++){
         change(i,j);
       }
     }
 
-    setTimeout(step, 500)
+    setTimeout(step, 5000)
   }
 
   $("body").append( createGrid(W, H) );
